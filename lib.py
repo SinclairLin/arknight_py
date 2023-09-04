@@ -47,24 +47,14 @@ def data_processing():
     soup = getURL(url)
 
     # pattern = re.compile('https://prts.wiki/images/*')
-    img_tags = soup.find_all('img', attrs={'data-src': True})
-    for img_tag in img_tags:
+    img_tags = soup.find_all("img", attrs={"data-src": True})
 
-        items = img_tag['data-src']
+    imgurl_file_path = os.path.join(os.path.dirname(__file__), "data", "imgurl.txt")
+    with open(imgurl_file_path, "w", encoding="utf-8") as file:
+        print("获得图片url中...")
 
-        imgurl_file_path = os.path.join(os.path.dirname(__file__), "data", "imgurl.txt")
-        print("获得名字中...")
-        with open(imgurl_file_path, 'w', encoding='utf-8') as file:
-            # 遍历匹配的元素并写入文件
-            # for item in items:
-            file.write(items + '\n')
-                # print("已获取%d个图片url")
+        for img_tag in img_tags:
+            data_src_value = img_tag["data-src"]
+            file.write(data_src_value + "\n")
 
-
-    # for item in html.find_all("div", class_="avatar lazyloaded"):
-    #     i += 1
-    #     item_str = str(item)
-    #     cn_name = re.findall(re.compile(r'data-src="([^"]+)"'), item_str)[0]
-    #     sheet.cell(i, 1).value = cn_name
-    #     print(str(cn_name) + "获取完成")
-
+        print("图片url获取完成!")
