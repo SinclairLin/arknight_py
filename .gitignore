@@ -1,5 +1,4 @@
-明日方舟干员信息-自用.py
-头像图标-自用.py
-data/
-test/
-avatar/
+data/*
+test/*
+avatar/*
+__pycache__/
