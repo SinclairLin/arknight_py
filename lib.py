@@ -1,60 +1,57 @@
-"""
-Author: nightmare-mio wanglongwei2009@qq.com
-Date: 2023-08-28 22:27:36
-LastEditTime: 2023-08-29 00:03:49
-Description: 请不要恶意请求
-"""
+#!/home/sinclair/uservenv/bin/python
+
+
 import os
-import urllib.request
-from bs4 import BeautifulSoup
-import re
-import openpyxl
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-import parsel
+import time
+import selenium
+
+# 初始化浏览器驱动
+chrome_options = Options()
+chrome_options.headless = True
+chrome_service = ChromeService(executable_path="/usr/bin/chromedriver")
+driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
 
 
-def getURL(url):
-    """爬取html"""
-    chrome_options = Options()
-    chrome_options.headless = True
-
-    chrome_service = ChromeService(executable_path="/usr/bin/chromedriver")
-    driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
-
+def get_img_urls(url):
+    """获取页面中具有data-src属性的img元素的data-src值"""
     driver.get(url)
+    img_elements = driver.find_elements_by_css_selector("img[data-src]")
+    img_urls = []
 
-    js_file_url = "https://static.prts.wiki/widgets/release/common.ffe0d211.js"
-    driver.execute_script(
-        f"var script = document.createElement('script');"
-        f"script.src = '{js_file_url}';"
-        f"document.head.appendChild(script);"
-    )
+    for img_element in img_elements:
+        # 模拟点击图片元素
+        img_element.click()
 
-    page_source = driver.page_source
-    soup = BeautifulSoup(page_source, "html.parser")
+        # 等待一段时间，确保页面加载完成
+        time.sleep(2)  # 可根据需要调整等待时间
 
-    driver.quit()
-    return soup
+        # 执行JavaScript脚本（这里只是示例，可以根据需求修改）
+        js_script = """
+            // 在这里执行你的JavaScript代码
+            // 例如：获取某个属性的值
+            return document.querySelector('your_selector').getAttribute('your_attribute');
+        """
+        img_url = driver.execute_script(js_script)
+
+        if img_url:
+            img_urls.append(img_url)
+
+    return img_urls
 
 
-def data_processing():
-    """爬取数据并进行处理"""
+def save_img_urls_to_file(img_urls, file_path):
+    """将获取到的img URL写入文件"""
+    with open(file_path, "w", encoding="utf-8") as file:
+        for img_url in img_urls:
+            file.write(img_url + "\n")
 
-    url = r"https://prts.wiki/w/%E5%B9%B2%E5%91%98%E4%B8%80%E8%A7%88"
-    soup = getURL(url)
 
-    # pattern = re.compile('https://prts.wiki/images/*')
-    img_tags = soup.find_all("img", attrs={"data-src": True})
+if __name__ == "__main__":
+    url = "https://prts.wiki/w/%E5%B9%B2%E5%91%98%E4%B8%80%E8%A7%88"
+    img_urls = get_img_urls(url)
 
     imgurl_file_path = os.path.join(os.path.dirname(__file__), "data", "imgurl.txt")
-    with open(imgurl_file_path, "w", encoding="utf-8") as file:
-        print("获得图片url中...")
+    save_img_urls_to_file(img_urls, imgurl_file_path)
 
-        for img_tag in img_tags:
-            data_src_value = img_tag["data-src"]
-            file.write(data_src_value + "\n")
-
-        print("图片url获取完成!")
+    # 最后关闭浏览器
+    driver.quit()

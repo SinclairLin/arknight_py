@@ -1,4 +1,4 @@
-data/*
+!data/imgurl.txt
 test/*
 avatar/*
 __pycache__/
